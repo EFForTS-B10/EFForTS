@@ -1,0 +1,34 @@
+1. add global: current_road_radius
+2. add this at the end of init-roads:
+  ;; Set the current road radius, that is used for determining destinations of the first road
+  set current_road_radius min-dist-roads
+
+3. use this define-destination procedure
+
+to define-destination
+
+  ;; Clear the old destination and reset the minimum road distance radius
+  set p_r1 nobody
+ ; let road-radius min-dist-roads
+  ;; Search for a patch that is not a road and has no roads within the defined radius
+  ;; If the search does not succeed, the radius where road patches are allowed is reduced
+  while [p_r1 = nobody]
+  [
+    
+    set p_r1 one-of patches with [p_road = 0 and not any? patches with [p_road = 1] in-radius current_road_radius]
+    if (p_r1 = nobody) [set current_road_radius current_road_radius - 1]
+    if (current_road_radius <= 0) [print "STOP" stop]
+  ]
+  
+  ask p_r1 [set pcolor red]
+
+
+  ;; Move the road building turtle to the closest road patch from the destination
+  ask turtles
+  [
+    pu
+    move-to min-one-of patches with [p_road = 1] [distance p_r1]
+    pd
+  ]
+
+end
